@@ -279,13 +279,15 @@
                 <li class="nav-item">
                   <a class="nav-link" href="shop.html">Shop</a>
                 </li>
-                <li class="nav-item">
+              <li class="nav-item">
                   <button class="nav-link" data-bs-toggle="modal" data-bs-target="#loginModal">LOGIN</button>
                 </li>
               </ul>
             </div>
           </div>
         </div>
+      </div>
+        <!-- Login Modal -->
         <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -308,14 +310,57 @@
                   <button type="submit" class="btn btn-primary">Login</button>
                 </form>
 
-
-                <!-- Existing code in login modal -->
-                <p class="mt-3">หากคุณลืมรหัสผ่าน? <a href="forgot-password.html">กู้คืนที่นี่</a></p>
-                <p class="mt-3">ถ้ายังไม่มีผู้ใช้? <button type="button" class="btn btn-link p-0" data-bs-toggle="modal"
-                    data-bs-target="#registerModal">ลงทะเบียนที่นี่</button></p>
-                
-                <!-- End of Register Modal -->
+                <!-- ปุ่มเปิด Register Modal -->
+                <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#registerModal">
+                  If you don't have an account (click here)
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+        
+
+        <!-- Register Modal (อยู่นอก Login Modal) -->
+        <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="register-form">
+                  <div class="mb-3">
+                    <label for="register-name" class="form-label">Your Name</label>
+                    <input type="text" class="form-control" id="register-name" placeholder="กรอกชื่อของคุณ" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="register-email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="register-email" placeholder="Enter email" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="register-password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="register-password" placeholder="Enter password"
+                      required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">register</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          const registerBtn = document.querySelector('[data-bs-target="#registerModal"]');
+          const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+          const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+
+          registerBtn.addEventListener('click', function () {
+            loginModal.hide();
+            setTimeout(() => registerModal.show(), 500); // หน่วงนิดหน่อยเพื่อให้ hide เสร็จก่อน
+          });
+        </script>
 
 
 
@@ -1370,5 +1415,65 @@
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
 </body>
+<script>
+  document.getElementById('register-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+
+    fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message) {
+        alert(data.message);
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+
+
+  document.getElementById('login-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  // ดึงข้อมูลจากฟอร์ม
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  // ส่งข้อมูลไปที่ API /api/login
+  fetch('/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message) {
+        alert(data.message);
+        
+        // ปิด modal หลังล็อกอินสำเร็จ
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.hide();  // ปิด modal ที่มีอยู่
+
+        // สามารถทำให้หน้าเว็บกลับมาทำงานได้ตามปกติ หรือไปยังหน้าอื่น
+        window.location.href = "/";  // ตัวอย่าง: เปลี่ยนหน้าไปที่หน้าโฮมเพจ
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
+    });
+});
+
+</script>
 
 </html>
